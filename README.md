@@ -75,13 +75,21 @@ Environment Variables
 Create a .env file at the root of the project:
 
 PORT=5000
+
 NODE_ENV=development
+
 MONGO_URI=<YOUR_MONGO_DB_CONNECTION_STRING>
+
 CORS_ORIGIN=http://localhost:5173
+
 ACCESS_TOKEN_SECRET=<YOUR_ACCESS_TOKEN_SECRET>
+
 ACCESS_TOKEN_EXPIRY=1d
+
 REFRESH_TOKEN_SECRET=<YOUR_REFRESH_TOKEN_SECRET>
+
 REFRESH_TOKEN_EXPIRY=10d
+
 FORGOT_PASSWORD_REDIRECT_URL=http://localhost:3000/forgot-password
 
 
