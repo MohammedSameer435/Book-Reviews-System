@@ -128,20 +128,35 @@ Production
 npm start
 
 API Endpoints
+
 Auth Routes
+
 Method	Endpoint	Description
+
 POST	/api/users/register	Register a new user
+
 POST	/api/users/login	Login a user
+
 POST	/api/users/refresh-token	Refresh access token
+
 Book Routes
+
 Method	Endpoint	Description
+
 POST	/api/books/addBook	Add a new book (auth required)
+
 GET	/api/books/	Get filtered books
+
 GET	/api/books/:id	Get book details by ID
+
 POST	/api/books/:id/reviews	Submit a review (auth required)
+
 PUT	/api/books/reviews/:id	Update a review (auth required)
+
 DELETE	/api/books/reviews/:id	Delete a review (auth required)
+
 GET	/api/books/search	Search books by title or author
+
 Usage
 
 All sensitive routes (adding books, submitting reviews) require authentication with a JWT access token.
