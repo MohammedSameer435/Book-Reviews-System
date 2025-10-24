@@ -1,293 +1,153 @@
-# Book Review API
+Book Review API
+Overview
 
-A RESTful API to manage books, users, and reviews. Users can register, login, add books, submit reviews, and search books.
+This is a RESTful API for managing users and books with reviews. It supports:
+User registration, login, and token-based authentication (access & refresh tokens)
 
----
+CRUD operations on books
 
-## Table of Contents
+Adding, updating, deleting reviews per user
 
-- [Project Setup](#project-setup)
-- [Running Locally](#running-locally)
-- [API Documentation (Postman Requests)](#api-documentation-postman-requests)
-  - [Books API](#books-api)
-  - [Users API](#users-api)
-- [Design Decisions & Assumptions](#design-decisions--assumptions)
+Filtering and searching books by title, author, and genre
 
----
+Technologies used:
 
-## Project Setup
-1. Clone the repository
-Open you terminal and run:
-git clone https://github.com/your-username/book-review-api.git
-cd book-review-api
+Node.js
 
-2.Install dependencies
-using npm: npm install
+Express.js
 
-3.Create Environment Variables
-In the root directory, create a .env file and add the following variables:
+MongoDB with Mongoose
+
+JWT authentication
+
+bcrypt for password hashing
+
+express-validator for input validation
+
+dotenv for environment variables
+
+Features
+User Authentication
+
+Register users with email verification token
+
+Login with JWT access token and refresh token
+
+Refresh access tokens securely
+
+Books
+
+Add books (authenticated users)
+
+Get filtered books with pagination
+
+Get book details by ID with paginated reviews
+
+Submit, update, delete reviews (per user)
+
+Search books by title or author
+
+Project Structure
+├── controllers
+│   ├── authcontroller.js
+│   └── bookcontroller.js
+├── middlewares
+│   ├── auth.middleware.js
+│   └── validator.middleware.js
+├── models
+│   ├── usersmodel.js
+│   └── booksmodel.js
+├── routes
+│   ├── auth.routes.js
+│   └── bookroutes.js
+├── utils
+│   ├── apierror.js
+│   ├── api-response.js
+│   └── asynchandler.js
+├── validators
+│   └── index.js
+├── app.js
+├── server.js
+└── .env
+
+Environment Variables
+
+Create a .env file at the root of the project:
 
 PORT=5000
-DATABASE_URL=your_mongodb_connection_string
-ACCESS_TOKEN_SECRET=your_secret_key
-REFRESH_TOKEN_SECRET=your_refresh_secret
+NODE_ENV=development
+MONGO_URI=<YOUR_MONGO_DB_CONNECTION_STRING>
+CORS_ORIGIN=http://localhost:5173
+ACCESS_TOKEN_SECRET=<YOUR_ACCESS_TOKEN_SECRET>
+ACCESS_TOKEN_EXPIRY=1d
+REFRESH_TOKEN_SECRET=<YOUR_REFRESH_TOKEN_SECRET>
+REFRESH_TOKEN_EXPIRY=10d
+FORGOT_PASSWORD_REDIRECT_URL=http://localhost:3000/forgot-password
 
-5.How to run locally
-Use "npm run start"
 
-6.Access the API
-Open your browser or Postman and go to:
-http://localhost:5000
+Notes:
 
-Books API
-1. Add a Book
+Replace <YOUR_MONGO_DB_CONNECTION_STRING> with your MongoDB URI.
 
-POST /api/books/addBook
+You can create your own database and collections (users and books) in MongoDB Atlas or locally.
 
-Headers:
+Replace <YOUR_ACCESS_TOKEN_SECRET> and <YOUR_REFRESH_TOKEN_SECRET> with strong random strings.
 
-Authorization: Bearer <access_token>
+Installation
 
-Content-Type: application/json
+Clone the repository:
 
-Body (JSON):
+git clone https://github.com/MohammedSameer435/Book-Reviews-System.git
 
-{
-  "title": "Book Title",
-  "author": "Author Name",
-  "genre": "Fiction",
-  "year": 2025,
-  "description": "Book description here"
-}
 
 
-Access: Protected (requires login)
 
-2. Get Filtered Books
+Install dependencies:
 
-GET /api/books/
+npm install
 
-Query Parameters (optional):
 
-genre=Fiction
+Create a .env file with the above environment variables.
 
-author=Author Name
+Running the Application
+Development
+npm run dev
 
-Access: Public
 
-3. Get Book by ID
+The server will run on http://localhost:5000.
 
-GET /api/books/:id
+Production
+npm start
 
-Access: Public
+API Endpoints
+Auth Routes
+Method	Endpoint	Description
+POST	/api/users/register	Register a new user
+POST	/api/users/login	Login a user
+POST	/api/users/refresh-token	Refresh access token
+Book Routes
+Method	Endpoint	Description
+POST	/api/books/addBook	Add a new book (auth required)
+GET	/api/books/	Get filtered books
+GET	/api/books/:id	Get book details by ID
+POST	/api/books/:id/reviews	Submit a review (auth required)
+PUT	/api/books/reviews/:id	Update a review (auth required)
+DELETE	/api/books/reviews/:id	Delete a review (auth required)
+GET	/api/books/search	Search books by title or author
+Usage
 
-Example: /api/books/64f9c8b1e5a2f12a34567890
+All sensitive routes (adding books, submitting reviews) require authentication with a JWT access token.
 
-4. Submit a Review
+Tokens are sent via cookies or Authorization: Bearer <token> header.
 
-POST /api/books/:id/reviews
+Input validation is done using express-validator. Invalid inputs return 422 with errors.
 
-Headers:
+Notes
 
-Authorization: Bearer <access_token>
+Passwords are hashed with bcrypt.
 
-Content-Type: application/json
+Email verification tokens are generated but actual email sending is not included.
 
-Body (JSON):
+Refresh tokens are stored in the user document in MongoDB.
 
-{
-  "rating": 5,
-  "comment": "Excellent book!"
-}
-
-
-Access: Protected (requires login)
-
-5. Update a Review
-
-PUT /api/books/reviews/:id
-
-Headers:
-
-Authorization: Bearer <access_token>
-
-Content-Type: application/json
-
-Body (JSON):
-
-{
-  "rating": 4,
-  "comment": "Updated review text"
-}
-
-
-Access: Protected (only the author can update)
-
-6. Delete a Review
-
-DELETE /api/books/reviews/:id
-
-Headers:
-
-Authorization: Bearer <access_token>
-
-Access: Protected (only author/admin)
-
-7. Search Books by Title or Author
-
-GET /api/books/search
-
-Query Parameters:
-
-title=Book Title
-
-author=Author Name
-
-Access: Public
-
-Users API
-1. Register User
-
-POST /api/users/register
-
-Headers: Content-Type: application/json
-
-Body (JSON):
-
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "securepassword"
-}
-
-
-Access: Public
-
-2. Login User
-
-POST /api/users/login
-
-Headers: Content-Type: application/json
-
-Body (JSON):
-
-{
-  "email": "john@example.com",
-  "password": "securepassword"
-}
-
-
-Output: JWT access token
-
-Access: Public
-
-3. Refresh Access Token
-
-POST /api/users/refresh-token
-
-Headers: Content-Type: application/json
-
-Body (JSON):
-
-{
-  "refreshToken": "<refresh_token>"
-}
-
-#Database Schema:
-*/
-const bookSchema = new Schema({
-  title: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    index: true,
-  },
-  author: {
-    type: String,
-    required: true,
-    lowercase: true,
-    index: true,
-  },
-  genre: {
-    type: String,
-    required: true,
-    lowercase: true,
-    index: true,
-  },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  },
-  reviews: [
-    {
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-      rating: { type: Number, min: 1, max: 5 },
-      comment: String,
-      createdAt: { type: Date, default: Date.now },
-    },
-  ],
-});
-*/
-
-const userSchema = new Schema(
-  {
-    avatar: {
-      type: {
-        url: { type: String },
-        localpath: { type: String },
-      },
-      default: {
-        url: "https://placehold.co/600x400",
-        localpath: "",
-      },
-    },
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      index: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-    },
-    fullname: {
-      type: String,
-      trim: true,
-    },
-    password: {
-      type: String,
-      required: [true, "Password is required"],
-    },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    refreshToken: {
-      type: String,
-    },
-    forgotPasswordToken: {
-      type: String,
-    },
-    forgotPasswordExpiry: {
-      type: Date,
-    },
-    emailVerificationToken: {
-      type: String,
-    },
-    emailVerificationExpiry: {
-      type: Date,
-    },
-  },
-  {
-    timestamps: true,
-  }
-)
+The API is structured to be easily extendable for features like email verification, password reset, and more.
